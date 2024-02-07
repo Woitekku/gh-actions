@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS [ghrunner]
+name: Deploy to Amazon ECS [gh-runner]
 
 on:
   push:
