@@ -91,7 +91,7 @@ jobs:
           --user-pool-id $COGNITO_USER_POOL_ID \
           --client-id $COGNITO_USER_POOL_CLIENT_ID \
           --query 'UserPoolClient.CallbackURLs' --output json)
-          MODIFIED_CALLBACK_URLS=$(echo "$CALLBACK_URLS" | jq ". += ["${{ env.$COGNITO_NEW_CALLBACK_URL }}"]")
+          MODIFIED_CALLBACK_URLS=$(echo "$CALLBACK_URLS" | jq ". += ["${{ env.COGNITO_NEW_CALLBACK_URL }}"]")
           aws cognito-idp update-user-pool-client --user-pool-id $COGNITO_USER_POOL_ID --client-id $COGNITO_USER_POOL_CLIENT_ID --callback-urls $MODIFIED_CALLBACK_URLS
 
       - name: Create AWS target group
