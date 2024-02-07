@@ -62,5 +62,5 @@ jobs:
           ECS_CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME }}
         with:
           task-definition: task-def.json
-          container-name: ${{ env.CONTAINER_NAME }}
+          container-name: ${{ env.ECS_CONTAINER_NAME }}
           image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }}
