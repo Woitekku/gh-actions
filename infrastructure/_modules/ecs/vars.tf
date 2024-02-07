@@ -26,6 +26,10 @@ variable "ecs_task_role_arn" {
   type = string
 }
 
+variable "codedeploy_role_arn" {
+  type = string
+}
+
 variable "vpc_id" {
   type = string
 }

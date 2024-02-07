@@ -146,3 +146,69 @@ resource "aws_ecs_service" "this" {
     Name        = format("%s-%s", var.account_name, var.environment)
   }
 }
+
+resource "aws_ecs_service" "bluegreen" {
+  for_each = local.ecs_services_bg
+
+  dynamic "capacity_provider_strategy" {
+    for_each = terraform.workspace == "production" ? [1] : []
+    content {
+      capacity_provider = "FARGATE"
+      base              = var.ecs.capacity_providers.fargate.base
+      weight            = var.ecs.capacity_providers.fargate.weight
+    }
+  }
+
+  dynamic "capacity_provider_strategy" {
+    for_each = terraform.workspace == "production" ? [1] : []
+    content {
+      capacity_provider = "FARGATE_SPOT"
+      weight            = var.ecs.capacity_providers.fargate_spot.weight
+    }
+  }
+
+  dynamic "capacity_provider_strategy" {
+    for_each = terraform.workspace != "production" ? [1] : []
+    content {
+      capacity_provider = "FARGATE_SPOT"
+      base              = var.ecs.capacity_providers.fargate_spot.base
+      weight            = var.ecs.capacity_providers.fargate_spot.weight
+    }
+  }
+
+  cluster                            = aws_ecs_cluster.this.id
+  deployment_maximum_percent         = each.value.deployment_maximum_percent
+  deployment_minimum_healthy_percent = each.value.deployment_minimum_healthy_percent
+  desired_count                      = each.value.desired_count
+  enable_execute_command             = true
+  dynamic "load_balancer" {
+    for_each = can(each.value.health_check) ? [1] : []
+    content {
+      target_group_arn = aws_lb_target_group.blue[each.key]["arn"]
+      container_name   = "server"
+      container_port   = var.ecs.tasks[each.key]["containers"]["server"]["ports"][0]["container_port"]
+    }
+  }
+  name = format("%s-%s-%s-bg", var.account_name, var.environment, each.key)
+  network_configuration {
+    assign_public_ip = false
+    security_groups  = [aws_security_group.ecs.id]
+    subnets          = var.vpc_subnets_app_ids
+  }
+  platform_version    = "LATEST"
+  scheduling_strategy = "REPLICA"
+
+  task_definition = aws_ecs_task_definition.this[each.key]["arn"]
+
+  deployment_controller {
+      type = "CODE_DEPLOY"
+  }
+
+  lifecycle {
+    ignore_changes = [task_definition, platform_version, load_balancer]
+  }
+
+  tags = {
+    Name        = format("%s-%s", var.account_name, var.environment)
+  }
+}

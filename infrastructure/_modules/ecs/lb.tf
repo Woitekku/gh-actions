@@ -72,3 +72,74 @@ resource "aws_lb_listener" "https" {
     Name        = format("%s-%s", var.account_name, var.environment)
   }
 }
+
+resource "aws_lb_target_group" "blue" {
+  for_each             = local.ecs_services_bg
+  deregistration_delay = 120
+  health_check {
+    enabled             = each.value.health_check.enabled
+    healthy_threshold   = each.value.health_check.healthy_threshold
+    interval            = each.value.health_check.interval
+    matcher             = each.value.health_check.matcher
+    path                = each.value.health_check.path
+    port                = each.value.health_check.port
+    protocol            = each.value.health_check.protocol
+    timeout             = each.value.health_check.timeout
+    unhealthy_threshold = each.value.health_check.unhealthy_threshold
+  }
+  name        = format("%s-%s-%s-blue", var.account_name, var.environment, each.key)
+  port        = each.value.port
+  protocol    = each.value.protocol
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = format("%s-%s", var.account_name, var.environment)
+  }
+}
+
+resource "aws_lb_target_group" "green" {
+  for_each             = local.ecs_services_bg
+  deregistration_delay = 120
+  health_check {
+    enabled             = each.value.health_check.enabled
+    healthy_threshold   = each.value.health_check.healthy_threshold
+    interval            = each.value.health_check.interval
+    matcher             = each.value.health_check.matcher
+    path                = each.value.health_check.path
+    port                = each.value.health_check.port
+    protocol            = each.value.health_check.protocol
+    timeout             = each.value.health_check.timeout
+    unhealthy_threshold = each.value.health_check.unhealthy_threshold
+  }
+  name        = format("%s-%s-%s-green", var.account_name, var.environment, each.key)
+  port        = each.value.port
+  protocol    = each.value.protocol
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = format("%s-%s", var.account_name, var.environment)
+  }
+}
+
+resource "aws_lb_listener_rule" "bluegreen" {
+    for_each = local.ecs_services_bg
+    listener_arn = aws_lb_listener.https[0].arn
+    priority = each.value.priority
+
+    action {
+        type             = "forward"
+        target_group_arn = aws_lb_target_group.blue[each.key].arn
+    }
+
+  condition {
+    host_header {
+      values = [format("bg.%s", var.domain_name)]
+    }
+  }
+
+    lifecycle {
+    ignore_changes = [action]
+  }
+}
