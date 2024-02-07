@@ -51,7 +51,7 @@ jobs:
         env:
           ECS_TASK_DEFINITION: ${{ vars.ECS_TASK_DEFINITION }}
         run: |
-          echo "::set-output name=task-def::$(aws ecs describe-task-definition --task-definition $ECS_TASK_DEFINITION --query 'taskDefinition' --output json)"
+          echo "task-def=$(aws ecs describe-task-definition --task-definition $ECS_TASK_DEFINITION --query 'taskDefinition' --output json)" >> $GITHUB_OUTPUT
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
