@@ -15,7 +15,7 @@ jobs:
       ECS_SERVICE: gh-actions-dev-gh-runner
       ECS_CLUSTER: gh-actions-dev
 
-  e23:
+  e2e:
     runs-on: self-hosted
     needs: runner_scale_up
     steps:
@@ -24,7 +24,7 @@ jobs:
           exit 0
 
   runner_scale_down:
-    needs: [runner_scale_up, cypress-e2e]
+    needs: [runner_scale_up, e2e]
     if: ${{ success() || (failure() && needs.runner_scale_up.result == 'success') }}
     uses: ./.github/workflows/runner-scale-down.yaml
     with:
