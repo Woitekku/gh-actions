@@ -118,21 +118,24 @@ resource "aws_ecs_service" "this" {
   }
   platform_version    = "LATEST"
   scheduling_strategy = "REPLICA"
-  service_connect_configuration {
-    enabled = true
-    namespace = aws_service_discovery_http_namespace.this.arn
-    service {
-      port_name = each.key
-      client_alias {
-        port = var.ecs.tasks[each.key]["containers"]["server"]["ports"][0]["container_port"]
-      }
-    }
-    log_configuration {
-      log_driver = "awslogs"
-      options = {
-        awslogs-group = aws_cloudwatch_log_group.this.name
-        awslogs-region = var.aws_region
-        awslogs-stream-prefix = format("envoy/%s", each.key)
+    dynamic "service_connect_configuration" {
+      for_each = can(each.value.health_check) ? [1] : []
+      content {
+        enabled   = true
+        namespace = aws_service_discovery_http_namespace.this.arn
+        service {
+          port_name = each.key
+          client_alias {
+            port = var.ecs.tasks[each.key]["containers"]["server"]["ports"][0]["container_port"]
+          }
+        }
+      log_configuration {
+        log_driver = "awslogs"
+        options    = {
+          awslogs-group         = aws_cloudwatch_log_group.this.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = format("envoy/%s", each.key)
+        }
       }
     }
   }

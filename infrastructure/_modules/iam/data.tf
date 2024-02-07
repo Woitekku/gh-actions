@@ -1,3 +1,7 @@
+data "aws_kms_alias" "secretsmanager" {
+  name = "alias/aws/secretsmanager"
+}
+
 data "aws_iam_policy_document" "assume_role_ecs_task" {
   statement {
     sid    = "ECSTask"
@@ -28,6 +32,24 @@ data "aws_iam_policy_document" "ecs_task" {
   }
 }
 
+data "aws_iam_policy_document" "ecs_task_exec" {
+  statement {
+    sid    = "ECSTaskExecutionSecretsManager"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [format("arn:aws:secretsmanager:%s:%s:secret:%s/*/*", var.aws_region, var.aws_account_id, var.account_name)]
+  }
+  statement {
+    sid    = "ECSTaskExecutionKMS"
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt"
+    ]
+    resources = [data.aws_kms_alias.secretsmanager.arn]
+  }
+}
 
 data "aws_iam_policy_document" "assume_role_codedeploy" {
   statement {

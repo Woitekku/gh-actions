@@ -72,6 +72,32 @@ inputs = {
         }
         cpu    = 512
         memory = 1024
+      },
+      gh-runner = {
+        containers = {
+          server = {
+            command            = null
+            cpu                = 128
+            essential          = true
+            image              = "164820026678.dkr.ecr.eu-central-1.amazonaws.com/gh-actions-gh-runner:latest"
+            logs_stream_prefix = "logs"
+            memory             = 256
+            memory_reservation = 128
+            ports = []
+            health_check = {
+                command     = [
+                    "CMD-SHELL",
+                    "exit 0"
+                ]
+                interval    = 15
+                retries     = 3
+                start_period = 20
+                timeout     = 2
+            }
+          }
+        }
+        cpu    = 256
+        memory = 512
       }
     }
     services_ext = {
@@ -100,7 +126,18 @@ inputs = {
         }
       }
     }
-    services_int = {}
+    services_int = {
+      gh-runner = {
+        deployment_maximum_percent         = 200
+        deployment_minimum_healthy_percent = 100
+        desired_count                      = 1
+        min_count                          = 1
+        max_count                          = 1
+        scale_in_cooldown                  = 180
+        scale_out_cooldown                 = 60
+        capacity_provider                  = "FARGATE_SPOT"
+      }
+    }
 
     services_bg_ext = {
       app = {

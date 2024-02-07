@@ -1,6 +1,5 @@
 ${jsonencode([for container_config in containers :
     {
-        "user": "1000",
         "command": "${container_config.command}",
         "cpu": "${container_config.cpu}",
         "essential": "${container_config.essential}",
@@ -38,6 +37,12 @@ ${jsonencode([for container_config in containers :
                 "hostPort": "${port.host_port}",
                 "protocol": "${port.protocol}",
                 "appProtocol": "${port.app_protocol}"
+            }
+        ],
+        "secrets": [for secret in keys(jsondecode(secrets.secret_string)) :
+            {
+                "name": "${secret}",
+                "valueFrom": format("%s:%s::", "${secrets.secret_id}", "${secret}")
             }
         ]
     }

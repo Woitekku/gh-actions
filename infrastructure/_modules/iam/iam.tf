@@ -30,6 +30,20 @@ resource "aws_iam_role_policy_attachment" "ecs_task_custom" {
   policy_arn = aws_iam_policy.ecs_task_custom.arn
 }
 
+resource "aws_iam_policy" "ecs_task_exec_custom" {
+  name   = format("%s-ecs-task-exec", var.account_name)
+  policy = data.aws_iam_policy_document.ecs_task_exec.json
+
+  tags = {
+    Name = format("%s-ecs-task-exec", var.account_name)
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_exec_custom" {
+  role       = aws_iam_role.ecs_task_exec.name
+  policy_arn = aws_iam_policy.ecs_task_exec_custom.arn
+}
+
 resource "aws_iam_role_policy_attachment" "ecs_task_exec" {
   role       = aws_iam_role.ecs_task_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
