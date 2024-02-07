@@ -3,6 +3,15 @@ name: Self-Hosted runner scale down
 on:
   workflow_call:
     inputs:
+      AWS_ACCESS_KEY_ID:
+        required: true
+        type: secret
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+        type: secret
+      AWS_REGION:
+        required: true
+        type: string
       ECS_SERVICE:
         required: true
         type: string
@@ -17,9 +26,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.AWS_REGION }}
 
       - name: Check if there is any runner
         id: is_runner_up
