@@ -5,8 +5,6 @@ on:
   schedule:
     - cron: "0 3 * * *" # every day at 3am UTC
 
-env:
-
 jobs:
   runner_scale_up:
     uses: ./.github/workflows/runner-scale-up.yaml
