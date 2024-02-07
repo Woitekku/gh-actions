@@ -64,12 +64,15 @@ jobs:
           TARGET_GROUP_PREFIX: ${{ vars.TARGET_GROUP_PREFIX }}
         run: |
           TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
-            --names $TARGET_GROUP_PREFIX-PR_NUMBER --output text | awk '{print $13}')
+            --names $TARGET_GROUP_PREFIX-$PR_NUMBER --output text | awk '{print $13}')
 
           aws elbv2 delete-target-group \
             --target-group-arn $TARGET_GROUP_ARN
 
-      - name: Comment with sandbox URL
+      - name: Code checkout
+        uses: actions/checkout@v3
+
+      - name: Comment with repo URL
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

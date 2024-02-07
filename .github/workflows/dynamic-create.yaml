@@ -135,7 +135,7 @@ jobs:
           aws ecs wait services-stable \
             --cluster $ECS_CLUSTER --services $ECS_SERVICE
 
-      - name: Comment with sandbox URL
+      - name: Comment with repo URL
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
