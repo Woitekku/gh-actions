@@ -1,0 +1,42 @@
+name: Self-Hosted runner scale up
+
+on:
+  workflow_call:
+    inputs:
+      AWS_ACCESS_KEY_ID:
+        required: true
+        type: string
+      AWS_SESSION_ACCESS_KEY:
+        required: true
+        type: string
+      AWS_REGION:
+        required: true
+        type: string
+      ECS_SERVICE:
+        required: true
+        type: string
+      ECS_CLUSTER:
+        required: true
+        type: string
+
+jobs:
+  runner_scale_up:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.AWS_REGION }}
+
+      - name: Check if there is any runner
+        id: is_runner_up
+        run: |
+          echo "RUNNERS_COUNT=$(aws ecs describe-services --cluster ${{ inputs.ECS_CLUSTER }} --service ${{ inputs.ECS_SERVICE }} --query 'services[0].runningCount' --output text)"  >> $GITHUB_OUTPUT
+
+      - name: Scale up ECS service
+        if: steps.is_runner_up.outputs.RUNNERS_COUNT == 0
+        run: |
+          aws ecs update-service --cluster ${{ inputs.ECS_CLUSTER }} --service ${{ inputs.ECS_SERVICE }} --desired-count 1
+          aws ecs wait services-stable --cluster ${{ inputs.ECS_CLUSTER }} --service ${{ inputs.ECS_SERVICE }}
