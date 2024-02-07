@@ -69,22 +69,24 @@ jobs:
           container-name: ${{ env.ECS_CONTAINER_NAME }}
           image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }}
 
-      - name: Register new Amazon ECS task definition
+      - name: Register AWS ECS task definition
+        id: register-task-definition
         env:
-          ECS_TASK_DEFINITION: ${{ steps.task-def.outputs.task-definition }}
+          TASK_DEFINITION: ${{ steps.task-def.outputs.task-definition }}
         run: |
-          aws ecs register-task-definition --cli-input-json file://$ECS_TASK_DEFINITION
+          aws ecs register-task-definition --cli-input-json file://$TASK_DEFINITION
 
       - name: Create AWS target group
         id: target-group
         env:
             TARGET_GROUP_PREFIX: ${{ vars.TARGET_GROUP_PREFIX }}
             VPC_ID: ${{ vars.VPC_ID }}
+            ECS_CONTAINER_PORT: ${{ vars.ECS_CONTAINER_PORT }}
         run: |
           echo "TARGET_GROUP_ARN=$(aws elbv2 create-target-group \
             --name $TARGET_GROUP_PREFIX-$PR_NUMBER \
             --protocol HTTP \
-            --port 3000 \
+            --port $ECS_CONTAINER_PORT \
             --target-type ip \
             --vpc-id $VPC_ID --output text | awk '{print $13}')" >> $GITHUB_OUTPUT
 
@@ -106,3 +108,27 @@ jobs:
               --condition '{"Field":"host-header","HostHeaderConfig":{"Values":["${{ env.PR_NUMBER }}.${{ env.DOMAIN_NAME }}"]}}' \
               --actions "Type=forward,TargetGroupArn=$TARGET_GROUP_ARN" \
               --priority $(expr 100 + $PR_NUMBER)
+
+      - name: Create AWS ECS service
+        id: ecs_service_create
+        env:
+          TARGET_GROUP_ARN: ${{ steps.target-group.outputs.TARGET_GROUP_ARN }}
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ vars.ECS_SERVICE }}-dynamic-$${ env.PR_NUMBER }}
+          ECS_TASK_DEFINITION: ${{ vars.ECS_TASK_DEFINITION }}
+          ECS_CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME }}
+          ECS_CONTAINER_PORT: ${{ vars.ECS_CONTAINER_PORT }}
+          ECS_SUBNETS: ${{ vars.ECS_SUBNETS }}
+          ECS_SECURITY_GROUPS: ${{ vars.ECS_SECURITY_GROUPS }}
+        run: |
+          aws ecs create-service \
+            --cluster $ECS_CLUSTER \
+            --service-name $ECS_SERVICE \
+            --task-definition $ECS_TASK_DEFINITION \
+            --desired-count 1 \
+            --load-balancers "targetGroupArn=$TARGET_GROUP_ARN,containerName=$CONTAINER_NAME,containerPort=ECS_CONTAINER_PORT" \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUPS],assignPublicIp=DISABLED}" \
+            --enable-execute-command \
+            --capacity-provider-strategy capacityProvider=FARGATE_SPOT,weight=1,base=1
+
+          aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_SERVICE
