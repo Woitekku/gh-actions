@@ -6,7 +6,7 @@ on:
     - cron: "0 3 * * *" # every day at 3am UTC
 
 jobs:
-  runner_scale_up:
+  runner_up:
     uses: ./.github/workflows/runner-scale-up.yaml
     with:
       ECS_SERVICE: gh-actions-dev-gh-runner
@@ -14,14 +14,14 @@ jobs:
 
   e2e:
     runs-on: self-hosted
-    needs: runner_scale_up
+    needs: runner_up
     steps:
       - name: Test endpoint
         run: |
           exit 0
 
-  runner_scale_down:
-    needs: [runner_scale_up, e2e]
+  runner_down:
+    needs: [runner_up, e2e]
     if: ${{ success() || (failure() && needs.runner_scale_up.result == 'success') }}
     uses: ./.github/workflows/runner-scale-down.yaml
     with:
