@@ -1,11 +1,11 @@
-name: Deploy to Amazon ECS [basic]
+name: Deploy to Amazon ECS [ghrunner]
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'src/hello-world-nodejs/**'
+      - 'src/gh-runner/**'
 
 # This is required for GitHub to AWS authentication over OIDC
 #permissions:
@@ -13,7 +13,7 @@ on:
 #  contents: read # This is required for actions/checkout
 
 env:
-  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  ECR_REPOSITORY: gh-runner
   DOCKER_IMAGE_TAG: ${{ github.sha }}
 
 jobs:
@@ -40,40 +40,40 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        working-directory: ./src/hello-world-nodejs
+        working-directory: ./src/gh-runner
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-      - name: Fetch Amazon ECS task definition
-        id: fetch-task-def
-        env:
-          ECS_TASK_DEFINITION: ${{ vars.ECS_TASK_DEFINITION }}
-        run: |
-          aws ecs describe-task-definition \
-            --task-definition $ECS_TASK_DEFINITION \
-            --query 'taskDefinition' --output json | jq 'del(.compatibilities, .taskDefinitionArn, .requiresAttributes, .revision, .status, .registeredAt, .registeredBy)' > task-def.json
-
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECS_TASK_DEFINITION: ${{ steps.fetch-task-def.outputs.task-def }}
-          ECS_CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME }}
-        with:
-          task-definition: task-def.json
-          container-name: ${{ env.ECS_CONTAINER_NAME }}
-          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }}
-
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        env:
-          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_SERVICE }}
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+#
+#      - name: Fetch Amazon ECS task definition
+#        id: fetch-task-def
+#        env:
+#          ECS_TASK_DEFINITION: ${{ vars.ECS_TASK_DEFINITION }}
+#        run: |
+#          aws ecs describe-task-definition \
+#            --task-definition $ECS_TASK_DEFINITION \
+#            --query 'taskDefinition' --output json | jq 'del(.compatibilities, .taskDefinitionArn, .requiresAttributes, .revision, .status, .registeredAt, .registeredBy)' > task-def.json
+#
+#      - name: Fill in the new image ID in the Amazon ECS task definition
+#        id: task-def
+#        uses: aws-actions/amazon-ecs-render-task-definition@v1
+#        env:
+#          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#          ECS_TASK_DEFINITION: ${{ steps.fetch-task-def.outputs.task-def }}
+#          ECS_CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME }}
+#        with:
+#          task-definition: task-def.json
+#          container-name: ${{ env.ECS_CONTAINER_NAME }}
+#          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }}
+#
+#      - name: Deploy Amazon ECS task definition
+#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+#        env:
+#          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+#          ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+#        with:
+#          task-definition: ${{ steps.task-def.outputs.task-definition }}
+#          service: ${{ env.ECS_SERVICE }}
+#          cluster: ${{ env.ECS_CLUSTER }}
+#          wait-for-service-stability: true
