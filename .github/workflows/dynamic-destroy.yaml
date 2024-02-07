@@ -34,7 +34,7 @@ jobs:
         continue-on-error: true
         env:
           ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_SERVICE }}-dynamic-$${ env.PR_NUMBER }}
+          ECS_SERVICE: ${{ vars.ECS_SERVICE }}-dynamic-${{ env.PR_NUMBER }}
         run: |
           aws ecs delete-service \
             --cluster $ECS_CLUSTER \
