@@ -100,13 +100,9 @@ jobs:
 
           LISTENER_ARN=$(aws elbv2 describe-listeners \
             --load-balancer-arn $LOAD_BALANCER_ARN --output text | grep LISTENERS | grep HTTPS | awk '{print $2}')
-
-          echo $PR_NUMBER
-          echo $DOMAIN_NAME
-          echo $PR_NUMBER.$DOMAIN_NAME
           
           aws elbv2 create-rule \
               --listener-arn $LISTENER_ARN \
-              --condition '{"Field":"host-header","HostHeaderConfig":{"Values":["$PR_NUMBER.$DOMAIN_NAME"]}}' \
+              --condition '{"Field":"host-header","HostHeaderConfig":{"Values":["${{ env.PR_NUMBER }}.${{ env.DOMAIN_NAME }}"]}}' \
               --actions "Type=forward,TargetGroupArn=$TARGET_GROUP_ARN" \
               --priority $(expr 100 + $PR_NUMBER)
