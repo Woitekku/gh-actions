@@ -24,6 +24,6 @@ locals {
 }
 
 inputs = {
-  domain_name = "ghactions.cichy.io"
+  domain_name       = "ghactions.cichy.io"
   delegation_set_id = "N08266861YHBBKRU0HF8Q"
 }

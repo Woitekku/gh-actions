@@ -1,7 +1,7 @@
 resource "aws_security_group" "lb" {
   description = "sg for lb"
   name        = format("%s-%s-lb", var.account_name, var.environment)
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
 
   lifecycle {
     create_before_destroy = true

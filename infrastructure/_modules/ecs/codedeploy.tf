@@ -1,13 +1,13 @@
 resource "aws_codedeploy_app" "this" {
-  for_each = local.ecs_services_bg
+  for_each         = local.ecs_services_bg
   compute_platform = "ECS"
   name             = format("%s-%s-app", var.account_name, var.environment)
 }
 
 resource "aws_codedeploy_deployment_group" "this" {
-  for_each = local.ecs_services_bg
+  for_each               = local.ecs_services_bg
   app_name               = aws_codedeploy_app.this[each.key].name
-  deployment_group_name  =  format("%s-%s-app", var.account_name, var.environment)
+  deployment_group_name  = format("%s-%s-app", var.account_name, var.environment)
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
   service_role_arn       = var.codedeploy_role_arn
 

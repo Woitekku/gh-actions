@@ -23,7 +23,7 @@ resource "aws_cognito_user_pool" "this" {
   }
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }
 

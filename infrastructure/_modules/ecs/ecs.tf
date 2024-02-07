@@ -14,20 +14,20 @@ resource "aws_ecs_cluster" "this" {
   }
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }
 
 resource "aws_ecs_cluster_capacity_providers" "this" {
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
-  cluster_name = aws_ecs_cluster.this.name
+  cluster_name       = aws_ecs_cluster.this.name
 
   dynamic "default_capacity_provider_strategy" {
     for_each = var.environment == "prd" ? [1] : []
     content {
       capacity_provider = "FARGATE"
-      base = var.ecs.capacity_providers.fargate.base
-      weight = var.ecs.capacity_providers.fargate.weight
+      base              = var.ecs.capacity_providers.fargate.base
+      weight            = var.ecs.capacity_providers.fargate.weight
     }
   }
 
@@ -35,23 +35,23 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
     for_each = var.environment != "prd" ? [1] : []
     content {
       capacity_provider = "FARGATE_SPOT"
-      base = var.ecs.capacity_providers.fargate_spot.base
-      weight = var.ecs.capacity_providers.fargate_spot.weight
+      base              = var.ecs.capacity_providers.fargate_spot.base
+      weight            = var.ecs.capacity_providers.fargate_spot.weight
     }
   }
 }
 resource "aws_ecs_task_definition" "this" {
   depends_on = [aws_secretsmanager_secret.this]
-  for_each = var.ecs.tasks
+  for_each   = var.ecs.tasks
   container_definitions = templatefile("task.tpl", {
-    account        = var.aws_account_id
-    awslogs-group  = aws_cloudwatch_log_group.this.name
-    containers     = each.value.containers
-    task_name      = each.key
-    environment    = var.environment
-    project        = var.account_name
-    region         = var.aws_region
-    secrets        = data.aws_secretsmanager_secret_version.this[each.key]
+    account       = var.aws_account_id
+    awslogs-group = aws_cloudwatch_log_group.this.name
+    containers    = each.value.containers
+    task_name     = each.key
+    environment   = var.environment
+    project       = var.account_name
+    region        = var.aws_region
+    secrets       = data.aws_secretsmanager_secret_version.this[each.key]
   })
   cpu                      = each.value.cpu
   execution_role_arn       = var.ecs_task_exec_role_arn
@@ -62,10 +62,10 @@ resource "aws_ecs_task_definition" "this" {
   runtime_platform {
     operating_system_family = "LINUX"
   }
-  task_role_arn =  var.ecs_task_role_arn
+  task_role_arn = var.ecs_task_role_arn
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }
 
@@ -76,8 +76,8 @@ resource "aws_ecs_service" "this" {
     for_each = var.environment == "prd" ? [1] : []
     content {
       capacity_provider = "FARGATE"
-      base = var.ecs.capacity_providers.fargate.base
-      weight = var.ecs.capacity_providers.fargate.weight
+      base              = var.ecs.capacity_providers.fargate.base
+      weight            = var.ecs.capacity_providers.fargate.weight
     }
   }
 
@@ -85,7 +85,7 @@ resource "aws_ecs_service" "this" {
     for_each = var.environment == "prd" ? [1] : []
     content {
       capacity_provider = "FARGATE_SPOT"
-      weight = var.ecs.capacity_providers.fargate_spot.weight
+      weight            = var.ecs.capacity_providers.fargate_spot.weight
     }
   }
 
@@ -93,8 +93,8 @@ resource "aws_ecs_service" "this" {
     for_each = var.environment != "prd" ? [1] : []
     content {
       capacity_provider = "FARGATE_SPOT"
-      base = var.ecs.capacity_providers.fargate_spot.base
-      weight = var.ecs.capacity_providers.fargate_spot.weight
+      base              = var.ecs.capacity_providers.fargate_spot.base
+      weight            = var.ecs.capacity_providers.fargate_spot.weight
     }
   }
   cluster                            = aws_ecs_cluster.this.id
@@ -118,24 +118,24 @@ resource "aws_ecs_service" "this" {
   }
   platform_version    = "LATEST"
   scheduling_strategy = "REPLICA"
-    dynamic "service_connect_configuration" {
+  service_connect_configuration {
+    enabled   = true
+    namespace = aws_service_discovery_http_namespace.this.arn
+    dynamic "service" {
       for_each = can(each.value.health_check) ? [1] : []
       content {
-        enabled   = true
-        namespace = aws_service_discovery_http_namespace.this.arn
-        service {
-          port_name = each.key
-          client_alias {
-            port = var.ecs.tasks[each.key]["containers"]["server"]["ports"][0]["container_port"]
-          }
+        port_name = each.key
+        client_alias {
+          port = var.ecs.tasks[each.key]["containers"]["server"]["ports"][0]["container_port"]
         }
-      log_configuration {
-        log_driver = "awslogs"
-        options    = {
-          awslogs-group         = aws_cloudwatch_log_group.this.name
-          awslogs-region        = var.aws_region
-          awslogs-stream-prefix = format("envoy/%s", each.key)
-        }
+      }
+    }
+    log_configuration {
+      log_driver = "awslogs"
+      options = {
+        awslogs-group         = aws_cloudwatch_log_group.this.name
+        awslogs-region        = var.aws_region
+        awslogs-stream-prefix = format("envoy/%s", each.key)
       }
     }
   }
@@ -146,7 +146,7 @@ resource "aws_ecs_service" "this" {
   }
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }
 
@@ -204,7 +204,7 @@ resource "aws_ecs_service" "bluegreen" {
   task_definition = aws_ecs_task_definition.this[each.key]["arn"]
 
   deployment_controller {
-      type = "CODE_DEPLOY"
+    type = "CODE_DEPLOY"
   }
 
   lifecycle {
@@ -212,6 +212,6 @@ resource "aws_ecs_service" "bluegreen" {
   }
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }

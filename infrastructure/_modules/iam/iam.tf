@@ -54,7 +54,7 @@ resource "aws_iam_role" "codedeploy" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_codedeploy.json
 
   tags = {
-    Name        = format("%s-%s-codedeploy", var.account_name, terraform.workspace)
+    Name = format("%s-%s-codedeploy", var.account_name, terraform.workspace)
   }
 }
 
@@ -63,7 +63,7 @@ resource "aws_iam_policy" "codedeploy" {
   policy = data.aws_iam_policy_document.codedeploy.json
 
   tags = {
-    Name        = format("%s-%s-codedeploy", var.account_name, terraform.workspace)
+    Name = format("%s-%s-codedeploy", var.account_name, terraform.workspace)
   }
 }
 

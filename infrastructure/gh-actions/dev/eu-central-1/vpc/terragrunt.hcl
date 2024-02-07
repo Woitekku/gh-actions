@@ -24,10 +24,10 @@ locals {
 }
 
 inputs = {
-  account_name    = local.account_name
-  environment     = local.environment
-  aws_account_id  = local.aws_account_id
-  aws_region      = local.aws_region
-  cidr_block      = "10.33.0.0/16"
-  ngw_ec2         = true
+  account_name   = local.account_name
+  environment    = local.environment
+  aws_account_id = local.aws_account_id
+  aws_region     = local.aws_region
+  cidr_block     = "10.33.0.0/16"
+  ngw_ec2        = true
 }

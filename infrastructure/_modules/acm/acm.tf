@@ -8,7 +8,7 @@ resource "aws_acm_certificate" "this" {
   }
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }
 

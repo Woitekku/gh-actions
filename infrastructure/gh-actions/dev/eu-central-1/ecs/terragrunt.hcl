@@ -24,12 +24,12 @@ locals {
 }
 
 inputs = {
-  account_name   = local.account_name
-  environment    = local.environment
-  aws_account_id = local.aws_account_id
-  aws_region     = local.aws_region
-  certificate_arn         = dependency.acm.outputs.certificate_arn
-  domain_name             = dependency.r53.outputs.domain_name
+  account_name    = local.account_name
+  environment     = local.environment
+  aws_account_id  = local.aws_account_id
+  aws_region      = local.aws_region
+  certificate_arn = dependency.acm.outputs.certificate_arn
+  domain_name     = dependency.r53.outputs.domain_name
   ecs = {
     container_insights = "disabled"
     capacity_providers = {
@@ -54,19 +54,19 @@ inputs = {
               {
                 container_port = 3000
                 host_port      = 3000
-                protocol      = "tcp"
-                app_protocol = "http"
+                protocol       = "tcp"
+                app_protocol   = "http"
               }
             ]
             health_check = {
-                command     = [
-                    "CMD-SHELL",
-                    "/usr/bin/curl 0:3000"
-                ]
-                interval    = 15
-                retries     = 3
-                start_period = 20
-                timeout     = 2
+              command = [
+                "CMD-SHELL",
+                "/usr/bin/curl 0:3000"
+              ]
+              interval     = 15
+              retries      = 3
+              start_period = 20
+              timeout      = 2
             }
           }
         }
@@ -83,16 +83,16 @@ inputs = {
             logs_stream_prefix = "logs"
             memory             = 256
             memory_reservation = 128
-            ports = []
+            ports              = []
             health_check = {
-                command     = [
-                    "CMD-SHELL",
-                    "exit 0"
-                ]
-                interval    = 15
-                retries     = 3
-                start_period = 20
-                timeout     = 2
+              command = [
+                "CMD-SHELL",
+                "exit 0"
+              ]
+              interval     = 15
+              retries      = 3
+              start_period = 20
+              timeout      = 2
             }
           }
         }
@@ -113,7 +113,7 @@ inputs = {
         port                               = 3000
         protocol                           = "HTTP"
         capacity_provider                  = "FARGATE_SPOT"
-        health_check                       = {
+        health_check = {
           enabled             = true
           healthy_threshold   = 2
           interval            = 10
@@ -138,7 +138,6 @@ inputs = {
         capacity_provider                  = "FARGATE_SPOT"
       }
     }
-
     services_bg_ext = {
       app = {
         deployment_maximum_percent         = 200
@@ -152,7 +151,7 @@ inputs = {
         port                               = 3000
         protocol                           = "HTTP"
         capacity_provider                  = "FARGATE_SPOT"
-        health_check                       = {
+        health_check = {
           enabled             = true
           healthy_threshold   = 2
           interval            = 10

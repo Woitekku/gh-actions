@@ -33,15 +33,15 @@ resource "aws_lb" "this" {
   subnets                    = var.vpc_subnets_web_ids
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }
 
 resource "aws_lb_listener" "http" {
-  count = length(var.ecs.services_ext) > 0 ? 1 : 0
+  count             = length(var.ecs.services_ext) > 0 ? 1 : 0
   load_balancer_arn = aws_lb.this[0].arn
-  port = 80
-  protocol = "HTTP"
+  port              = 80
+  protocol          = "HTTP"
   default_action {
     type = "redirect"
 
@@ -56,12 +56,12 @@ resource "aws_lb_listener" "http" {
   }
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }
 
 resource "aws_lb_listener" "https" {
-    count                      = length(var.ecs.services_ext) > 0 ? 1 : 0
+  count           = length(var.ecs.services_ext) > 0 ? 1 : 0
   certificate_arn = var.certificate_arn
   default_action {
     type             = "forward"
@@ -73,7 +73,7 @@ resource "aws_lb_listener" "https" {
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }
 
@@ -128,14 +128,14 @@ resource "aws_lb_target_group" "green" {
 }
 
 resource "aws_lb_listener_rule" "bluegreen" {
-    for_each = local.ecs_services_bg
-    listener_arn = aws_lb_listener.https[0].arn
-    priority = each.value.priority
+  for_each     = local.ecs_services_bg
+  listener_arn = aws_lb_listener.https[0].arn
+  priority     = each.value.priority
 
-    action {
-        type             = "forward"
-        target_group_arn = aws_lb_target_group.blue[each.key].arn
-    }
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.blue[each.key].arn
+  }
 
   condition {
     host_header {
@@ -143,7 +143,7 @@ resource "aws_lb_listener_rule" "bluegreen" {
     }
   }
 
-    lifecycle {
+  lifecycle {
     ignore_changes = [action]
   }
 }

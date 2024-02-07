@@ -22,7 +22,20 @@ jobs:
     steps:
       - name: Test endpoint
         run: |
-          exit 0
+          # URL to check
+          URL="http://app.gh-actions-dev.local:3000"
+
+          # Use curl to get the HTTP status code
+          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" "$URL")
+
+          # Check if the status code is 200
+          if [ "$STATUS_CODE" -eq 200 ]; then
+            echo "URL $URL is up and returned HTTP 200 OK."
+            exit 0
+          else
+            echo "URL $URL did not return HTTP 200 OK. Returned HTTP $STATUS_CODE."
+            exit 1  
+          fi
 
   runner_down:
     needs: [runner_up, e2e]

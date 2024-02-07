@@ -8,7 +8,7 @@ locals {
     {
       filepath     = "userdata_script_nat.tpl"
       content-type = "text/x-shellscript"
-      vars         = {
+      vars = {
         ACCOUNTNAME = var.account_name
         ENVIRONMENT = var.environment
       }

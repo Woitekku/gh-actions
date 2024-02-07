@@ -18,6 +18,6 @@ resource "aws_route53_zone" "this" {
   comment           = format("%s-%s", var.account_name, var.environment)
 
   tags = {
-    Name        = format("%s-%s", var.account_name, var.environment)
+    Name = format("%s-%s", var.account_name, var.environment)
   }
 }

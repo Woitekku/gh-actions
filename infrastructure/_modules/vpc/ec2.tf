@@ -1,5 +1,5 @@
 resource "aws_launch_template" "nat" {
-  depends_on = [aws_route_table.private]
+  depends_on             = [aws_route_table.private]
   image_id               = data.aws_ami.amzn2.id
   instance_type          = "t2.nano"
   name_prefix            = format("%s-%s-nat", var.account_name, var.environment)
@@ -32,8 +32,8 @@ resource "aws_launch_template" "nat" {
 }
 
 resource "aws_autoscaling_group" "nat" {
-  depends_on = [aws_route_table.private]
-  for_each = var.ngw_ec2 ? toset(sort(data.aws_availability_zones.this.zone_ids)) : toset([])
+  depends_on        = [aws_route_table.private]
+  for_each          = var.ngw_ec2 ? toset(sort(data.aws_availability_zones.this.zone_ids)) : toset([])
   desired_capacity  = "1"
   health_check_type = "EC2"
   launch_template {
