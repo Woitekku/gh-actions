@@ -28,5 +28,5 @@ inputs = {
   environment    = local.environment
   aws_account_id = local.aws_account_id
   aws_region     = local.aws_region
-  repositories = ["app"]
+  repositories = ["gh-runner", "app"]
 }
