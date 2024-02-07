@@ -94,7 +94,6 @@ jobs:
             --vpc-id $VPC_ID --output text | awk '{print $13}')" >> $GITHUB_OUTPUT
 
       - name: Create AWS load balancer listener rule
-        id: listener_rule
         env:
           LOAD_BALANCER_NAME: ${{ vars.LOAD_BALANCER_NAME }}
           TARGET_GROUP_ARN: ${{ steps.target-group.outputs.TARGET_GROUP_ARN }}
@@ -113,7 +112,6 @@ jobs:
               --priority $(expr 100 + $PR_NUMBER)
 
       - name: Create AWS ECS service
-        id: ecs_service_create
         env:
           TARGET_GROUP_ARN: ${{ steps.target-group.outputs.TARGET_GROUP_ARN }}
           ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}

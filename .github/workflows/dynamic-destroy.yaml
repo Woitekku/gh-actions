@@ -1,0 +1,70 @@
+name: Destroy Amazon ECS [dynamic]
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+    paths:
+      - 'src/**'
+
+# This is required for GitHub to AWS authentication over OIDC
+#permissions:
+#  id-token: write # This is required for requesting the JWT
+#  contents: read # This is required for actions/checkout
+
+env:
+  PR_NUMBER: ${{ github.event.number }}
+
+jobs:
+  destroy:
+    name: Destroy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Delete AWS ECS service
+        continue-on-error: true
+        env:
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ vars.ECS_SERVICE }}-dynamic-$${ env.PR_NUMBER }}
+        run: |
+          aws ecs delete-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force
+
+      - name: Delete AWS load balancer listener rule
+        continue-on-error: true
+        env:
+          LOAD_BALANCER_NAME: ${{ vars.LOAD_BALANCER_NAME }}
+        run: |
+          LOAD_BALANCER_ARN=$(aws elbv2 describe-load-balancers \
+            --names $LOAD_BALANCER_NAME --output text | grep LOADBALANCERS | awk '{print $6}')
+
+          LISTENER_ARN=$(aws elbv2 describe-listeners \
+            --load-balancer-arn $LOAD_BALANCER_ARN --output text | grep LISTENERS | grep HTTPS | awk '{print $2}')
+
+          RULE_ARN=$(aws elbv2 describe-rules \
+            --listener-arn $LISTENER_ARN --output text | grep RULES | awk '$3 == 100 + $PR_NUMBER {print $NF}')
+
+          aws elbv2 delete-rule \
+              --rule-arn $RULE_ARN
+
+      - name: Delete AWS target group
+        continue-on-error: true
+        env:
+          TARGET_GROUP_PREFIX: ${{ vars.TARGET_GROUP_PREFIX }}
+        run: |
+          TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
+            --names $TARGET_GROUP_PREFIX-PR_NUMBER --output text | awk '{print $13}')
+
+          aws elbv2 delete-target-group \
+            --target-group-arn $TARGET_GROUP_ARN
