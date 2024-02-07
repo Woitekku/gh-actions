@@ -18,6 +18,7 @@ env:
   ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
   DOCKER_IMAGE_TAG: ${{ github.sha }}
   PR_NUMBER: ${{ github.event.number }}
+  DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
 
 
 jobs:
@@ -97,7 +98,6 @@ jobs:
         env:
           LOAD_BALANCER_NAME: ${{ vars.LOAD_BALANCER_NAME }}
           TARGET_GROUP_ARN: ${{ steps.target-group.outputs.TARGET_GROUP_ARN }}
-          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
         run: |
           LOAD_BALANCER_ARN=$(aws elbv2 describe-load-balancers \
             --names $LOAD_BALANCER_NAME --output text | grep LOADBALANCERS | awk '{print $6}')
