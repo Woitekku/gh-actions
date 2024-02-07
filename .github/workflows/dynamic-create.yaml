@@ -19,6 +19,9 @@ env:
   DOCKER_IMAGE_TAG: ${{ github.sha }}
   PR_NUMBER: ${{ github.event.number }}
   DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+  COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
+  COGNITO_USER_POOL_CLIENT_ID: ${{ vars.COGNITO_USER_POOL_CLIENT_ID }}
+  COGNITO_USER_POOL_DOMAIN: ${{ vars.COGNITO_USER_POOL_DOMAIN }}
 
 
 jobs:
@@ -82,8 +85,6 @@ jobs:
 
       - name: Add callback URL to AWS cognito user pool client
         env:
-          COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
-          COGNITO_USER_POOL_CLIENT_ID: ${{ vars.COGNITO_USER_POOL_CLIENT_ID }}
           COGNITO_NEW_CALLBACK_URL: https://${{ env.PR_NUMBER }}.${{ env.DOMAIN_NAME }}
         run: |
           CALLBACK_URLS=$(aws cognito-idp describe-user-pool-client \
@@ -121,7 +122,26 @@ jobs:
           aws elbv2 create-rule \
               --listener-arn $LISTENER_ARN \
               --condition '{"Field":"host-header","HostHeaderConfig":{"Values":["${{ env.PR_NUMBER }}.${{ env.DOMAIN_NAME }}"]}}' \
-              --actions "Type=forward,TargetGroupArn=$TARGET_GROUP_ARN" \
+              --actions '[
+                  {
+                    "Type": "authenticate-cognito",
+                    "Order": 1,
+                    "AuthenticateCognitoConfig": {
+                      "UserPoolArn": "${{ env.COGNITO_USER_POOL_ID }}",
+                      "UserPoolClientId": "${{ env.COGNITO_USER_POOL_CLIENT_ID }}",
+                      "UserPoolDomain": "${{ env.COGNITO_USER_POOL_DOMAIN }}",
+                      "Scope": "openid",
+                      "SessionCookieName": "AWSELBAuthSessionCookie",
+                      "SessionTimeout": 3600,
+                      "OnUnauthenticatedRequest": "authenticate"
+                    }
+                  },
+                  {
+                    "Type": "forward",
+                    "Order": 2,
+                    "TargetGroupArn": "${{ env.TARGET_GROUP_ARN }}"
+                  }
+                ]' \
               --priority $(expr 100 + $PR_NUMBER)
 
       - name: Create AWS ECS service
