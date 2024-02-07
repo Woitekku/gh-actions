@@ -68,3 +68,10 @@ jobs:
 
           aws elbv2 delete-target-group \
             --target-group-arn $TARGET_GROUP_ARN
+
+      - name: Comment with sandbox URL
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh pr comment $PR_NUMBER --body "❌ Dynamic environment for pull-request #$PR_NUMBER has been destroyed."

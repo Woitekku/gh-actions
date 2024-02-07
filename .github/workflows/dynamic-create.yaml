@@ -134,3 +134,10 @@ jobs:
 
           aws ecs wait services-stable \
             --cluster $ECS_CLUSTER --services $ECS_SERVICE
+
+      - name: Comment with sandbox URL
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh pr comment $PR_NUMBER --body "🚀 Dynamic environment for pull-request #$PR_NUMBER is ready: https://$PR_NUMBER.$DOMAIN_NAME"
