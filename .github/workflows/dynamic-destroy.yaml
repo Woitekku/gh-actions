@@ -74,7 +74,7 @@ jobs:
         env:
           COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
           COGNITO_USER_POOL_CLIENT_ID: ${{ vars.COGNITO_USER_POOL_CLIENT_ID }}
-          COGNITO_CALLBACK_URL: https://${{ env.PR_NUMBER }}.${{ vars.DOMAIN_NAME }}
+          COGNITO_CALLBACK_URL: https://${{ env.PR_NUMBER }}.${{ vars.DOMAIN_NAME }}/oauth2/idpresponse
         run: |
           CALLBACK_URLS=$(aws cognito-idp describe-user-pool-client \
           --user-pool-id $COGNITO_USER_POOL_ID \

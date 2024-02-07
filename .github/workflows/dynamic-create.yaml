@@ -85,7 +85,7 @@ jobs:
 
       - name: Add callback URL to AWS cognito user pool client
         env:
-          COGNITO_NEW_CALLBACK_URL: https://${{ env.PR_NUMBER }}.${{ env.DOMAIN_NAME }}
+          COGNITO_NEW_CALLBACK_URL: https://${{ env.PR_NUMBER }}.${{ env.DOMAIN_NAME }}/oauth2/idpresponse
         run: |
           CALLBACK_URLS=$(aws cognito-idp describe-user-pool-client \
           --user-pool-id $COGNITO_USER_POOL_ID \
