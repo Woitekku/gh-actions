@@ -53,7 +53,7 @@ jobs:
             --load-balancer-arn $LOAD_BALANCER_ARN --output text | grep LISTENERS | grep HTTPS | awk '{print $2}')
 
           RULE_ARN=$(aws elbv2 describe-rules \
-            --listener-arn $LISTENER_ARN --output text | grep RULES | awk '$3 == 100 + $PR_NUMBER {print $NF}')
+            --listener-arn $LISTENER_ARN --output text | grep RULES | awk '$3 == 100 + ${{ env.PR_NUMBER }} {print $NF}')
 
           aws elbv2 delete-rule \
               --rule-arn $RULE_ARN
