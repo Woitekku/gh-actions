@@ -9,9 +9,9 @@ jobs:
   runner_scale_up:
     uses: ./.github/workflows/runner-scale-up.yaml
     with:
-      AWS_ACCESS_KEY_ID: arn:aws:iam::736867282375:role/casehug-github
-      AWS_SECRET_ACCESS_KEY: casehug-github
-      AWS_REGION: eu-central-1
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ env.AWS_REGION }}
       ECS_SERVICE: gh-actions-dev-gh-runner
       ECS_CLUSTER: gh-actions-dev
 
@@ -28,8 +28,8 @@ jobs:
     if: ${{ success() || (failure() && needs.runner_scale_up.result == 'success') }}
     uses: ./.github/workflows/runner-scale-down.yaml
     with:
-      AWS_ACCESS_KEY_ID: arn:aws:iam::736867282375:role/casehug-github
-      AWS_SECRET_ACCESS_KEY: casehug-github
-      AWS_REGION: eu-central-1
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ env.AWS_REGION }}
       ECS_SERVICE: gh-actions-dev-gh-runner
       ECS_CLUSTER: gh-actions-dev
