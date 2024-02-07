@@ -78,11 +78,19 @@ jobs:
           COGNITO_CALLBACK_URL: https://${{ env.PR_NUMBER }}.${{ vars.DOMAIN_NAME }}/oauth2/idpresponse
         run: |
           CALLBACK_URLS=$(aws cognito-idp describe-user-pool-client \
-          --user-pool-id $COGNITO_USER_POOL_ID \
-          --client-id $COGNITO_USER_POOL_CLIENT_ID \
-          --query 'UserPoolClient.CallbackURLs' --output json)
+            --user-pool-id $COGNITO_USER_POOL_ID \
+            --client-id $COGNITO_USER_POOL_CLIENT_ID \
+            --query 'UserPoolClient.CallbackURLs' --output json)
           MODIFIED_CALLBACK_URLS=$(echo $CALLBACK_URLS | jq 'map(select(. != "${{ env.COGNITO_CALLBACK_URL }}"))'
-          aws cognito-idp update-user-pool-client --user-pool-id $COGNITO_USER_POOL_ID --client-id $COGNITO_USER_POOL_CLIENT_ID --callback-urls "$MODIFIED_CALLBACK_URLS"
+          aws cognito-idp update-user-pool-client \
+            --user-pool-id $COGNITO_USER_POOL_ID \
+            --client-id $COGNITO_USER_POOL_CLIENT_ID \
+            --allowed-o-auth-flows "code" \
+            --allowed-o-auth-flows-user-pool-client \
+            --allowed-o-auth-scopes "openid" \
+            --read-attributes '["name"]' \
+            --supported-identity-providers '["COGNITO"]' \
+            --callback-urls "$MODIFIED_CALLBACK_URLS"
 
       - name: Code checkout
         uses: actions/checkout@v3
