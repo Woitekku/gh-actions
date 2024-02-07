@@ -19,7 +19,7 @@ on:
         required: true
 
 jobs:
-  up:
+  scale:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
