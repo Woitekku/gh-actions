@@ -84,14 +84,6 @@ jobs:
           MODIFIED_CALLBACK_URLS=$(echo $CALLBACK_URLS | jq 'map(select(. != "${{ env.COGNITO_CALLBACK_URL }}"))'
           aws cognito-idp update-user-pool-client --user-pool-id $COGNITO_USER_POOL_ID --client-id $COGNITO_USER_POOL_CLIENT_ID --callback-urls "$MODIFIED_CALLBACK_URLS"
 
-
-          CALLBACK_URLS=$(aws cognito-idp describe-user-pool-client \
-          --user-pool-id $COGNITO_USER_POOL_ID \
-          --client-id $COGNITO_USER_POOL_CLIENT_ID \
-          --query 'UserPoolClient.CallbackURLs' --output text)
-          MODIFIED_CALLBACK_URLS=$(echo "$CALLBACK_URLS $COGNITO_NEW_CALLBACK_URL" | jq -R 'split(" ")')
-          aws cognito-idp update-user-pool-client --user-pool-id $COGNITO_USER_POOL_ID --client-id $COGNITO_USER_POOL_CLIENT_ID --callback-urls "$MODIFIED_CALLBACK_URLS"
-
       - name: Code checkout
         uses: actions/checkout@v3
 
