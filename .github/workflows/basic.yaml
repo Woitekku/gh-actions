@@ -38,6 +38,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
           DOCKER_IMAGE_TAG: ${{ github.sha }}
+        working-directory: ./src/hello-world-nodejs
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG
