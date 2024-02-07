@@ -99,8 +99,8 @@ jobs:
             --allowed-o-auth-flows "code" \
             --allowed-o-auth-flows-user-pool-client \
             --allowed-o-auth-scopes "openid" \
-            --read-attributes ["name"] \
-            --supported-identity-providers ["COGNITO"] \
+            --read-attributes '["name"]' \
+            --supported-identity-providers '["COGNITO"]' \
             --callback-urls "$MODIFIED_CALLBACK_URLS"
 
       - name: Create AWS target group
