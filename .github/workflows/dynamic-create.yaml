@@ -80,6 +80,19 @@ jobs:
           aws ecs register-task-definition \
             --cli-input-json file://$TASK_DEFINITION
 
+      - name: Add callback URL to AWS cognito user pool client
+        env:
+          COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
+          COGNITO_USER_POOL_CLIENT_ID: ${{ vars.COGNITO_USER_POOL_CLIENT_ID }}
+          COGNITO_NEW_CALLBACK_URL: https://${{ env.PR_NUMBER }}.${{ env.DOMAIN_NAME }}
+        run: |
+          CALLBACK_URLS=$(aws cognito-idp describe-user-pool-client \
+          --user-pool-id $COGNITO_USER_POOL_ID \
+          --client-id $COGNITO_USER_POOL_CLIENT_ID \
+          --query 'UserPoolClient.CallbackURLs' --output text)
+          MODIFIED_CALLBACK_URLS="$CURRENT_CALLBACK_URLS $COGNITO_NEW_CALLBACK_URL"
+          aws cognito-idp update-user-pool-client --user-pool-id $COGNITO_USER_POOL_ID --client-id $COGNITO_USER_POOL_CLIENT_ID --callback-urls $MODIFIED_CALLBACK_URLS
+
       - name: Create AWS target group
         id: target-group
         env:
