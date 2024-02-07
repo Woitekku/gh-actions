@@ -55,7 +55,9 @@ jobs:
         env:
           ECS_TASK_DEFINITION: ${{ vars.ECS_TASK_DEFINITION }}
         run: |
-          aws ecs describe-task-definition --task-definition $ECS_TASK_DEFINITION --query 'taskDefinition' --output json | jq 'del(.compatibilities, .taskDefinitionArn, .requiresAttributes, .revision, .status, .registeredAt, .registeredBy)' > task-def.json
+          aws ecs describe-task-definition \
+            --task-definition $ECS_TASK_DEFINITION \
+            --query 'taskDefinition' --output json | jq 'del(.compatibilities, .taskDefinitionArn, .requiresAttributes, .revision, .status, .registeredAt, .registeredBy)' > task-def.json
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -74,7 +76,8 @@ jobs:
         env:
           TASK_DEFINITION: ${{ steps.task-def.outputs.task-definition }}
         run: |
-          aws ecs register-task-definition --cli-input-json file://$TASK_DEFINITION
+          aws ecs register-task-definition \
+            --cli-input-json file://$TASK_DEFINITION
 
       - name: Create AWS target group
         id: target-group
@@ -126,9 +129,10 @@ jobs:
             --service-name $ECS_SERVICE \
             --task-definition $ECS_TASK_DEFINITION \
             --desired-count 1 \
-            --load-balancers "targetGroupArn=$TARGET_GROUP_ARN,containerName=$CONTAINER_NAME,containerPort=ECS_CONTAINER_PORT" \
-            --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUPS],assignPublicIp=DISABLED}" \
+            --load-balancers "targetGroupArn=$TARGET_GROUP_ARN,containerName=$ECS_CONTAINER_NAME,containerPort=ECS_CONTAINER_PORT" \
+            --network-configuration "awsvpcConfiguration={subnets=[$ECS_SUBNETS],securityGroups=[$ECS_SECURITY_GROUPS],assignPublicIp=DISABLED}" \
             --enable-execute-command \
             --capacity-provider-strategy capacityProvider=FARGATE_SPOT,weight=1,base=1
 
-          aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_SERVICE
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER --services $ECS_SERVICE
