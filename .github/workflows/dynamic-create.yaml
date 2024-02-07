@@ -20,6 +20,7 @@ env:
   PR_NUMBER: ${{ github.event.number }}
   DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
   COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
+  COGNITO_USER_POOL_ARN: ${{ vars.COGNITO_USER_POOL_ARN }}
   COGNITO_USER_POOL_CLIENT_ID: ${{ vars.COGNITO_USER_POOL_CLIENT_ID }}
   COGNITO_USER_POOL_DOMAIN: ${{ vars.COGNITO_USER_POOL_DOMAIN }}
 
@@ -127,7 +128,7 @@ jobs:
                     "Type": "authenticate-cognito",
                     "Order": 1,
                     "AuthenticateCognitoConfig": {
-                      "UserPoolArn": "${{ env.COGNITO_USER_POOL_ID }}",
+                      "UserPoolArn": "${{ env.COGNITO_USER_POOL_ARN }}",
                       "UserPoolClientId": "${{ env.COGNITO_USER_POOL_CLIENT_ID }}",
                       "UserPoolDomain": "${{ env.COGNITO_USER_POOL_DOMAIN }}",
                       "Scope": "openid",
