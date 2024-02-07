@@ -54,6 +54,10 @@ resource "aws_lb_listener" "http" {
       status_code = "HTTP_301"
     }
   }
+
+  tags = {
+    Name        = format("%s-%s", var.account_name, var.environment)
+  }
 }
 
 resource "aws_lb_listener" "https" {

@@ -68,8 +68,8 @@ data "aws_iam_policy_document" "codedeploy" {
     actions = ["iam:PassRole"]
 
     resources = [
-      format("arn:aws:iam::%s:role/%s-*-ecs-task", var.aws_account_id, var.account_name),
-      format("arn:aws:iam::%s:role/%s-*-ecs-exec-task", var.aws_account_id, var.account_name)
+      format("arn:aws:iam::%s:role/%s-ecs-task", var.aws_account_id, var.account_name),
+      format("arn:aws:iam::%s:role/%s-ecs-task-exec", var.aws_account_id, var.account_name)
     ]
   }
 
