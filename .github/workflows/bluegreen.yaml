@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
+      - 'src/hello-world-nodejs/**'
 
 # This is required for GitHub to AWS authentication over OIDC
 #permissions:
