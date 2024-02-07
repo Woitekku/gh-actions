@@ -71,6 +71,7 @@ jobs:
           
 
       - name: Remove callback URL from AWS cognito user pool client
+        continue-on-error: true
         env:
           COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
           COGNITO_USER_POOL_CLIENT_ID: ${{ vars.COGNITO_USER_POOL_CLIENT_ID }}
