@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS
+name: Deploy to Amazon ECS [basic]
 
 on:
   push:
@@ -7,13 +7,13 @@ on:
     paths:
       - 'src/**'
 
-env:
-  AWS_REGION: eu-central-1
-
 # This is required for GitHub to AWS authentication over OIDC
 #permissions:
 #  id-token: write # This is required for requesting the JWT
 #  contents: read # This is required for actions/checkout
+
+env:
+  DOCKER_IMAGE_TAG: ${{ github.sha }}
 
 jobs:
   deploy:
@@ -34,3 +34,12 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_LATEST_TAG
