@@ -3,7 +3,7 @@ const app = express();
 const port = 3000;
 
 app.get('/', (req, res) => {
-  res.send('Hello World! Tri Cognito');
+  res.send('Hello World! ohto');
 });
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
