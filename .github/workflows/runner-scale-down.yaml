@@ -35,6 +35,6 @@ jobs:
           echo "RUNNERS_COUNT=$(aws ecs describe-services --cluster ${{ inputs.ECS_CLUSTER }} --service ${{ inputs.ECS_SERVICE }} --query 'services[0].runningCount' --output text)"  >> $GITHUB_OUTPUT
 
       - name: Scale down ECS service
-        if: steps.is-runner-up.outputs.RUNNERS_COUNT > 0
+        if: steps.is-runner-up.outputs.RUNNERS_COUNT != 0
         run: |
           aws ecs update-service --cluster ${{ inputs.ECS_CLUSTER }} --service ${{ inputs.ECS_SERVICE }} --desired-count 0
