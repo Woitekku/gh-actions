@@ -82,7 +82,7 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         env:
           ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+          ECS_SERVICE: ${{ vars.ECS_SERVICE }}-bg
           CODEDEPLOY_APPLICATION: ${{ vars.CODEDEPLOY_APPLICATION }}
           CODEDEPLOY_DEPLOYMENT_GROUP: ${{ vars.CODEDEPLOY_DEPLOYMENT_GROUP }}
         with:
