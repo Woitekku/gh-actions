@@ -51,7 +51,7 @@ jobs:
         env:
           ECS_TASK_DEFINITION: ${{ vars.ECS_TASK_DEFINITION }}
         run: |
-          echo "task-def=$(aws ecs describe-task-definition --task-definition $ECS_TASK_DEFINITION --query 'taskDefinition' --output json)" >> $GITHUB_OUTPUT
+          aws ecs describe-task-definition --task-definition $ECS_TASK_DEFINITION --query 'taskDefinition' --output json > task-def.json
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -61,6 +61,6 @@ jobs:
           ECS_TASK_DEFINITION: ${{ steps.fetch-task-def.outputs.task-def }}
           ECS_CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME }}
         with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          task-definition: task-def.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }}
