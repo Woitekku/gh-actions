@@ -101,9 +101,38 @@ inputs = {
       }
     }
     services_int = {}
+
+    services_bg_ext = {
+      app = {
+        deployment_maximum_percent         = 200
+        deployment_minimum_healthy_percent = 100
+        desired_count                      = 1
+        min_count                          = 1
+        max_count                          = 1
+        scale_in_cooldown                  = 180
+        scale_out_cooldown                 = 60
+        priority                           = 11
+        port                               = 3000
+        protocol                           = "HTTP"
+        capacity_provider                  = "FARGATE_SPOT"
+        health_check                       = {
+          enabled             = true
+          healthy_threshold   = 2
+          interval            = 10
+          matcher             = 200
+          path                = "/"
+          port                = "traffic-port"
+          protocol            = "HTTP"
+          timeout             = 5
+          unhealthy_threshold = 2
+        }
+      }
+    }
+    services_bg_int = {}
   }
   ecs_task_exec_role_arn = dependency.iam.outputs.ecs_task_exec_role_arn
   ecs_task_role_arn      = dependency.iam.outputs.ecs_task_role_arn
+  codedeploy_role_arn    = dependency.iam.outputs.codedeploy_role_arn
   vpc_id                 = dependency.vpc.outputs.vpc_id
   vpc_subnets_web_ids    = dependency.vpc.outputs.vpc_subnets_web_ids
   vpc_subnets_app_ids    = dependency.vpc.outputs.vpc_subnets_app_ids
