@@ -29,5 +29,9 @@ jobs:
     if: ${{ success() || (failure() && needs.runner_scale_up.result == 'success') }}
     uses: ./.github/workflows/runner-scale-down.yaml
     with:
+      AWS_REGION: ${{ vars.AWS_REGION }}
       ECS_SERVICE: gh-actions-dev-gh-runner
       ECS_CLUSTER: gh-actions-dev
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
