@@ -26,7 +26,6 @@ resource "aws_cognito_user_pool_client" "this" {
   allowed_oauth_scopes                 = ["openid"]
   access_token_validity                = 60
   callback_urls                        = [format("https://%s/oauth2/idpresponse", var.domain_name)]
-  default_redirect_uri                 = format("https://%s/oauth2/idpresponse", var.domain_name)
   generate_secret                      = true
   id_token_validity                    = 60
   name                                 = "loadbalancer"
@@ -38,9 +37,20 @@ resource "aws_cognito_user_pool_client" "this" {
     id_token      = "minutes"
     refresh_token = "days"
   }
+
+  lifecycle {
+    ignore_changes = [callback_urls]
+  }
 }
 
 resource "aws_cognito_user_pool_domain" "this" {
   domain       = format("%s-%s", var.account_name, var.environment)
   user_pool_id = aws_cognito_user_pool.this.id
+}
+
+resource "aws_cognito_user" "this" {
+  user_pool_id = aws_cognito_user_pool.this.id
+  username     = "nordcloud"
+  enabled      = true
+  password     = "Password123!"
 }
