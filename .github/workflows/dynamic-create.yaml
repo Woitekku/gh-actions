@@ -3,7 +3,7 @@ name: Deploy to Amazon ECS [dynamic]
 on:
   pull_request:
     branches:
-      - feat/*
+      - main
     types:
       - opened
     paths:
